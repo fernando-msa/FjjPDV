@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 30% 7%;
+  --foreground: 210 40% 98%;
+  --card: 222 28% 11%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 28% 11%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 177 77% 47%;
+  --primary-foreground: 220 30% 7%;
+  --secondary: 222 24% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 223 18% 16%;
+  --muted-foreground: 215 16% 63%;
+  --accent: 190 90% 55%;
+  --accent-foreground: 220 30% 7%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 220 18% 22%;
+  --input: 220 18% 22%;
+  --ring: 177 77% 47%;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 35%),
+    radial-gradient(circle at 85% 5%, rgba(14, 165, 233, 0.18), transparent 28%),
+    linear-gradient(180deg, #08101f 0%, #050915 100%);
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+::selection {
+  background: hsl(var(--primary) / 0.25);
+  color: hsl(var(--foreground));
+}
+
+.pdv-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
