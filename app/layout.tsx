@@ -22,7 +22,6 @@ export const metadata: Metadata = {
   },
   description: "PDV offline-first com Next.js, Supabase e IndexedDB.",
   manifest: "/manifest.webmanifest",
-  themeColor: "#08101f",
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg"
@@ -36,6 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <meta name="theme-color" content="#08101f" />
+      </head>
       <body className={`${fontSans.variable} ${fontMono.variable} antialiased`}>
         <RegisterServiceWorker />
         {children}

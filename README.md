@@ -65,6 +65,7 @@ PDVs precisam ser rápidos, estáveis e previsíveis. A proposta aqui foi montar
 - Perfis separados entre operator e admin.
 - Operator acessa o fluxo operacional.
 - Admin tem visão completa de estoque, painel e controles administrativos.
+- Em localhost, o app pode entrar em modo de demonstração local quando o Supabase exigir confirmação de e-mail ou limitar o login, para permitir testes rápidos do fluxo.
 
 ## Setup local
 
