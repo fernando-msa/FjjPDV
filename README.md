@@ -1,47 +1,102 @@
 # FjjPDV
 
-PDV offline-first com Next.js, TypeScript, Tailwind CSS, Supabase e IndexedDB.
+FjjPDV é um ponto de venda offline-first construído para mostrar arquitetura, experiência de operação e capacidade de execução em um produto realista de varejo.
 
-## O que esta pronto
+O projeto combina checkout rápido, gestão de caixa, controle de estoque, painel administrativo e sincronização com nuvem em uma interface pensada para operar com teclado, mesmo quando a conexão cai.
 
-- Frente de caixa com busca por nome, SKU e codigo de barras.
-- Carrinho com ajuste de quantidade, descontos e meios de pagamento.
-- Movimentacao de caixa com suprimento e sangria.
-- Estoque, dashboard e ultimas vendas persistidos localmente.
-- Manifest, service worker e base para operacao PWA.
-- Login com Supabase Auth e perfis `operator` / `admin`.
+## Destaques
 
-## Como rodar
+- Checkout de alta velocidade com busca por nome, SKU e código de barras.
+- Carrinho com ajuste rápido de quantidade, desconto e múltiplas formas de pagamento.
+- Fluxo de caixa com abertura, suprimento, sangria e fechamento.
+- Estoque com custo, preço de venda, margem e alerta de reposição.
+- Dashboard com faturamento diário, ticket médio e produtos mais vendidos.
+- Modo offline com IndexedDB, fila local e sincronização posterior com Supabase.
+- Login com Supabase Auth e perfis de acesso separados entre operador e admin.
+- Base PWA com manifest e service worker.
 
-1. Instale as dependencias com `npm install`.
-2. Copie `.env.example` para `.env.local` e preencha as variaveis do Supabase.
-3. Rode `npm run dev`.
+## Por que este projeto existe
 
-## Variaveis de ambiente
+PDVs precisam ser rápidos, estáveis e previsíveis. A proposta aqui foi montar uma solução que demonstre:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- consistência transacional com PostgreSQL;
+- operação resiliente sem depender de internet;
+- separação clara entre fluxo operacional e área administrativa;
+- uma experiência de caixa pensada para produtividade real, não apenas para demo visual.
 
-## Autenticacao e perfis
+## Stack
 
-- Novos cadastros entram como `operator` por padrao.
-- A tabela `profiles` fica em `supabase/schema.sql`.
-- Para promover um usuario a `admin`, altere o campo `role` na tabela `profiles` no Supabase.
-- Operadores veem o fluxo de caixa e um resumo operacional; admins veem as telas completas de estoque e painel.
+- Frontend: Next.js, TypeScript e Tailwind CSS.
+- UI: componentes próprios inspirados em shadcn/ui.
+- Backend e banco: Supabase com PostgreSQL.
+- Offline-first: IndexedDB para persistência local e fila de sincronização.
+- PWA: manifest e service worker para instalação e uso contínuo.
 
-## Teste de login
+## Funcionalidades implementadas
 
-1. Crie o projeto no Supabase e copie a `Project URL` e a `anon public key`.
-2. Preencha `.env.local` com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-3. Execute o app, crie um usuario no modal de acesso e confirme a linha correspondente em `profiles`.
-4. Para testar o papel `admin`, atualize `profiles.role` para `admin` no dashboard do Supabase.
+### Frente de caixa
+
+- Pesquisa rápida de produtos por nome, SKU ou código de barras.
+- Inclusão de itens no carrinho com um clique ou leitura simulada de código de barras.
+- Finalização de venda com cálculo de total, desconto, recebido e troco.
+
+### Movimentação de caixa
+
+- Abertura de sessão de caixa.
+- Registro de suprimentos e sangrias.
+- Persistência local dos movimentos para uso offline.
+
+### Estoque e produto
+
+- Cadastro estruturado com custo, preço, margem e estoque mínimo.
+- Baixa automática no estoque ao concluir uma venda.
+- Indicadores visuais para itens em baixo estoque.
+
+### Painel administrativo
+
+- Faturamento do dia.
+- Ticket médio.
+- Produtos mais vendidos.
+- Visão resumida da operação para tomada de decisão.
+
+### Autenticação e perfis
+
+- Login com Supabase Auth.
+- Perfis separados entre operator e admin.
+- Operator acessa o fluxo operacional.
+- Admin tem visão completa de estoque, painel e controles administrativos.
+
+## Setup local
+
+1. Instale as dependências com npm install.
+2. Copie .env.example para .env.local.
+3. Preencha as variáveis do Supabase.
+4. Rode npm run dev.
+
+## Variáveis de ambiente
+
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+## Como testar o login
+
+1. Crie o projeto no Supabase e copie a Project URL e a anon public key.
+2. Preencha o arquivo .env.local com os valores do projeto.
+3. Execute o app e faça o cadastro pelo modal de acesso.
+4. Confirme o registro gerado na tabela profiles.
+5. Para testar a experiência administrativa, altere o campo role para admin no Supabase.
 
 ## Banco no Supabase
 
-O schema inicial esta em `supabase/schema.sql`.
+O schema inicial está em supabase/schema.sql.
 
-## Atalhos
+## Atalhos do operador
 
-- `F2` para focar a busca.
-- `F4` para finalizar a venda.
-- `Ctrl+S` para registrar suprimento.
+- F2 foca a busca de produtos.
+- F4 finaliza a venda.
+- Ctrl+S registra suprimento.
+
+## Observações de produto
+
+- O app foi estruturado para continuar operando sem internet e sincronizar quando a conexão retornar.
+- O foco principal é demonstrar um PDV com boa UX, boa base técnica e narrativa forte de portfólio.
