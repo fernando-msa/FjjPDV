@@ -1,134 +1,176 @@
-# FjjPDV
+# FjjPDV - Ponto de Venda Moderno & Offline-First
 
-FjjPDV é um ponto de venda offline-first construído para mostrar arquitetura, experiência de operação e capacidade de execução em um produto realista de varejo.
+**FjjPDV** é um sistema completo de Ponto de Venda (PDV / POS) moderno, ágil e de alta performance, construído com arquitetura **offline-first** para atender às exigências reais do comércio e varejo físico moderno, espelhando os melhores padrões de mercado de softwares como *Square, Clover, Toast, Linx, Totvs, ContaAzul e Hiper*.
 
-O projeto combina checkout rápido, gestão de caixa, controle de estoque, painel administrativo e sincronização com nuvem numa interface pensada para operar em tela cheia de monitor de caixa — com teclado, com leitor de código de barras e mesmo quando a conexão cai.
+O projeto combina uma frente de caixa ultra-rápida, múltiplos métodos de pagamento (split payment), gestão de comandas e vendas em espera, identificação de cliente com CPF na nota e programa de fidelidade, emissão e impressão de cupom térmico (80mm/58mm), envio de comprovante via WhatsApp, geração dinâmica de Pix com QR Code em tela, fechamento de caixa cego com conferência de valores, controle de estoque com CRUD completo no painel administrativo e sincronização resiliente com PostgreSQL / Supabase.
 
-## Destaques
+---
 
-- Checkout em tela única, sem rolagem: carrinho, total e forma de pagamento sempre visíveis.
-- Visor de total no estilo LED de registradora, com alto contraste para leitura rápida.
-- Busca por nome, SKU, categoria ou código de barras, com filtro rápido por categoria.
-- Múltiplas formas de pagamento (Pix, cartão, dinheiro) com cálculo automático de troco.
-- Movimentação de caixa (suprimento e sangria) em gaveta lateral, sem interromper o checkout.
-- Cancelamento de venda com reposição automática de estoque, motivo obrigatório e trilha de auditoria — restrito ao papel admin.
-- Painel administrativo com faturamento, ticket médio, estoque com margem e histórico de vendas.
-- Modo offline com IndexedDB, fila local de sincronização e reconciliação posterior com Supabase.
-- Login com Supabase Auth e perfis de acesso separados entre operador e admin.
-- PWA instalável, com manifest e service worker (network-first na navegação, para nunca travar numa versão desatualizada).
+## 🚀 Recursos e Funcionalidades de Mercado
 
-## Por que este projeto existe
+### ⚡ 1. Frente de Caixa & Operação Ágil
+- **Checkout em tela única (Single-Screen)**: layout otimizado para monitores de caixa, mantendo catálogo, carrinho, visor de LED ambar, formas de pagamento e atalhos sempre visíveis sem rolagem desnecessária.
+- **Grade Rápida Touch / Favoritos**: painel visual de acesso rápido para itens de alto giro com categorização por cores, perfeito para telas touch screen.
+- **Busca Multicritério**: pesquisa instantânea por nome, SKU, código de barras (EAN-13) ou categoria via pills de navegação.
+- **Descontos Flexíveis**: aplicação de desconto geral na venda (em R$ ou %) ou desconto individualizado por item no carrinho.
+- **Vendas em Espera / Comandas (`F6`)**: suspenda atendimentos em andamento (ex: cliente que esqueceu a carteira, mesa em atendimento) e retome com 1 clique.
+- **Identificação do Cliente / "CPF na Nota" (`F7`)**: validação de dígitos verificadores de CPF/CNPJ, máscara automática, pontuação de fidelidade e seleção de clientes cadastrados.
 
-PDVs precisam ser rápidos, estáveis e previsíveis. A proposta aqui foi montar uma solução que demonstre:
+### 💳 2. Pagamentos & Comprovantes Digitais
+- **Multi-Pagamento / Pagamento Dividido (`F8`)**: suporte a divisão de uma mesma venda em múltiplas modalidades (Pix + Dinheiro + Cartão de Crédito/Débito + Vale) com cálculo de saldo restante e troco em tempo real.
+- **PIX Dinâmico com QR Code em Tela**: geração automática de payload Pix padrão Banco Central / EMVCo BR Code com valor exato da venda, exibição de QR Code vetorial SVG e botão de Copia-e-Cola com simulação de confirmação.
+- **Cupom Térmico Não Fiscal (80mm/58mm)**: visual fiel de bobina térmica com dados da loja, operador, cliente, lista detalhada de itens, totalizadores, forma de pagamento e código de barras.
+- **Impressão Nativa**: estilização `@media print` pronta para impressoras térmicas ESC/POS (Elgin, Bematech, Daruma, Epson).
+- **Envio Direto por WhatsApp**: disparo de mensagem formatada via link direto `wa.me` com o comprovante completo para o WhatsApp do cliente.
 
-- consistência transacional com PostgreSQL;
-- operação resiliente sem depender de internet;
-- separação clara entre fluxo operacional e área administrativa, inclusive na interface;
-- controles de integridade que qualquer PDV comercial exige (reposição de estoque, auditoria de cancelamento, conferência de caixa);
-- uma experiência de caixa pensada para produtividade real de um operador, não apenas para demo visual.
+### 💼 3. Gestão Financeira & Auditoria de Caixa
+- **Fechamento de Caixa Cego (`F9`)**: contagem cega informada pelo operador (dinheiro em gaveta, comprovantes de cartão e pix); o sistema apura o saldo esperado, calcula eventuais quebras ou sobras de caixa e gera relatório impresso de turno.
+- **Suprimento e Sangria (`Ctrl+S`)**: gaveta lateral para movimentações de entrada e retirada sem travar a venda.
+- **Cancelamento e Estorno de Vendas**: restrito ao papel Admin, exigindo justificativa por escrito, trilha de auditoria e reposição automática do estoque.
 
-## Stack
+### 📊 4. Painel Administrativo & Gestão de Estoque
+- **CRUD Completo de Produtos**: cadastro e edição de produtos com gerador automático de código de barras EAN-13, SKU, cálculo de margem de lucro bruta em tempo real e alerta de estoque mínimo.
+- **Exportação de Vendas para CSV**: download de relatórios detalhados com 1 clique para análise em Excel ou Google Sheets.
+- **Auditoria de Fechamentos**: histórico consolidado das conferências de turnos de caixa fechados.
+- **Métricas em Tempo Real**: faturamento do dia, ticket médio, vendas realizadas e saldo em dinheiro na gaveta.
 
-- Frontend: Next.js 15, React 19, TypeScript e Tailwind CSS.
-- UI: componentes próprios inspirados em shadcn/ui, com tokens de design em CSS variables.
-- Backend e banco: Supabase (PostgreSQL, Auth e Row Level Security).
-- Offline-first: IndexedDB (via `idb`) para persistência local e fila de sincronização.
-- PWA: manifest e service worker para instalação e uso contínuo.
+---
 
-## Arquitetura
+## ⌨️ Mapa Completo de Atalhos de Teclado
 
-A lógica é separada em hooks reutilizáveis, e a interface é dividida por papel de usuário — não existe uma tela única que mistura checkout e gestão.
+O FjjPDV foi desenhado para operação rápida por teclado, eliminando o uso obrigatório de mouse:
+
+| Atalho | Ação Executada |
+|---|---|
+| `F2` | Focar na barra de busca de produtos / SKU / Cód. Barras |
+| `F4` | Finalizar a venda atual |
+| `F6` | Abrir gaveta de Comandas / Vendas em Espera |
+| `F7` | Abrir modal de Identificação de Cliente (CPF na Nota) |
+| `F8` | Abrir modal de Multi-Pagamento (Pagamento Dividido) |
+| `F9` | Abrir modal de Fechamento de Caixa Cego & Conferência |
+| `Ctrl + S` | Abrir gaveta de Suprimento / Sangria de Caixa |
+| `Esc` | Fechar qualquer gaveta ou modal ativo |
+
+---
+
+## 🛠️ Stack Tecnológica
+
+- **Frontend**: Next.js 15, React 19, TypeScript e Tailwind CSS.
+- **UI & Ícones**: Lucide Icons, design system com tokens em CSS variables (visor de LED âmbar e alto contraste).
+- **Backend & Banco de Dados**: Supabase (PostgreSQL com Row Level Security, Auth e Triggers).
+- **Offline-First**: IndexedDB (`idb` v2) com persistência local resiliente, detecção automática de conexão e fila de sincronização em segundo plano.
+- **PWA**: Web App Manifest e Service Worker com estratégia *network-first* na navegação.
+
+---
+
+## 📁 Estrutura e Arquitetura do Projeto
 
 ```
-lib/hooks/
-  use-auth.ts            autenticação Supabase + modo demo local
-  use-offline-store.ts   produtos, vendas, caixa, fila de sync e IndexedDB
-  use-cart.ts            carrinho, totais e troco
+app/
+  globals.css              design tokens, visor LED e regras @media print para bobina térmica
+  layout.tsx               configuração de fontes, viewport e metadados
+  manifest.ts              manifesto PWA para instalação
+  page.tsx                 ponto de entrada
 
 components/
-  auth/login-screen.tsx      tela de login e cadastro
-  operator/operator-screen.tsx   checkout do operador (tela cheia, sem rolagem)
-  admin/admin-dashboard.tsx      painel administrativo
-  shared/                        peças reutilizadas pelas duas telas
-  pdv-app.tsx                    orquestrador: liga os hooks e roteia por papel
+  operator/
+    operator-screen.tsx      checkout do operador com visor, catálogo e atalhos
+    pix-modal.tsx            modal de QR Code Pix dinâmico e payload Copia-e-Cola
+    receipt-modal.tsx        cupom térmico 80mm com impressão nativa e envio via WhatsApp
+    customer-modal.tsx       identificação rápida de cliente com CPF/CNPJ e fidelidade
+    parked-sales-drawer.tsx  gaveta de comandas e vendas em espera (Park & Resume)
+    split-payment-modal.tsx  modal de divisão em múltiplas formas de pagamento
+    cash-closing-modal.tsx   fechamento de caixa cego com conferência esperada vs informada
+    item-discount-modal.tsx  desconto individual por item no carrinho (R$ ou %)
+    quick-favorites-grid.tsx grade rápida touch de produtos mais vendidos
+  admin/
+    admin-dashboard.tsx      painel de métricas, estoque, relatórios e auditoria de caixa
+    product-form-modal.tsx   cadastro e edição de produtos com gerador EAN e margem
+  shared/
+    status-bar.tsx           barra de status online/offline, seletor de papel e sincronização
+    pdv-ui.tsx               componentes compartilhados (MetricCard, PaymentButton, etc.)
+  auth/
+    login-screen.tsx         tela de login e criação de conta
+  pdv-app.tsx                orquestrador principal que liga hooks e rotas
+
+lib/
+  hooks/
+    use-auth.ts              autenticação Supabase + modo de demonstração local
+    use-offline-store.ts     persistência IndexedDB, produtos, vendas, comandas, caixa e sync
+    use-cart.ts              carrinho, split payments, descontos por item e cliente
+  utils/
+    pix.ts                   gerador de payload Pix EMV BR Code e matriz QR Code pura
+    formatters.ts            máscaras e validadores de CPF/CNPJ, telefone e formatador de recibo
+  local-db.ts                camada IndexedDB (v2) com stores para produtos, vendas, comandas e clientes
+  mock-data.ts               dados iniciais de demonstração para operação imediata
+  types.ts                   tipagem estrita TypeScript de todas as entidades
+  supabase.ts                cliente Supabase para sincronização
 ```
 
-Essa separação existe para que a tela de operador fique enxuta de propósito: ela só mostra o que quem está no caixa precisa decidir naquele instante. Estoque com margem, histórico completo e sincronização técnica ficam no painel administrativo.
+---
 
-## Funcionalidades implementadas
+## 🧪 Guias de Teste dos Fluxos Principais
 
-### Frente de caixa
+### 1. Testando Multi-Pagamento (Pagamento Dividido)
+1. Adicione itens ao carrinho somando qualquer valor (ex: R$ 40,00).
+2. Pressione `F8` ou clique no botão **Dividido**.
+3. Adicione R$ 20,00 no Pix e R$ 20,00 no Dinheiro (com R$ 30,00 recebidos).
+4. Observe o cálculo do saldo restante zerando e a apuração do troco.
+5. Clique em **Concluir Multi-Pagamento** e finalize a venda.
 
-- Pesquisa rápida de produtos por nome, SKU, categoria ou código de barras.
-- Filtro por categoria em formato de pills, para reduzir digitação.
-- Inclusão de itens no carrinho com um clique ou leitura de código de barras.
-- Ajuste de quantidade, remoção de item e desconto por venda.
-- Finalização com cálculo de total, valor recebido e troco, e confirmação visual da venda concluída.
-- Atalhos de teclado: `F2` foca a busca, `F4` finaliza a venda, `Ctrl+S` abre e confirma suprimento.
+### 2. Testando Vendas em Espera (Comandas)
+1. Adicione produtos ao carrinho.
+2. Pressione `F6` ou clique no botão **Comandas**.
+3. Digite um nome (ex: "Mesa 02") e clique em **Salvar**.
+4. O carrinho será guardado e o caixa liberado para o próximo atendimento.
+5. Pressione `F6` novamente e clique em **Retomar Venda no Caixa**.
 
-### Movimentação de caixa
+### 3. Testando Identificação do Cliente & Envio por WhatsApp
+1. Pressione `F7` ou clique em **Identificar Cliente**.
+2. Digite um CPF válido ou selecione um cliente da lista (ex: "Mariana Silva").
+3. Clique em **Aplicar na Venda**.
+4. Finalize a venda; o comprovante abrirá automaticamente com os dados do cliente e o botão **WhatsApp** pronto para envio.
 
-- Abertura de sessão de caixa com saldo inicial.
-- Registro de suprimentos e sangrias numa gaveta lateral, sem sair do checkout.
-- Persistência local dos movimentos para uso offline.
+### 4. Testando PIX Dinâmico com QR Code Real
+1. Selecione a opção **Pix** e finalize a venda ou abra o modal.
+2. O QR Code vetorial será renderizado com o payload oficial BR Code no valor exato.
+3. Teste o botão **Copiar Código Pix** ou clique em **Confirmar Pix Recebido**.
 
-### Cancelamento de venda
+### 5. Testando Fechamento de Caixa Cego
+1. Pressione `F9` ou clique em **Fechar Caixa**.
+2. Digite os valores físicos contados em dinheiro, comprovantes de cartão e pix.
+3. Clique em **Realizar Fechamento** e visualize o relatório de auditoria comparando o valor apurado pelo sistema versus o informado.
 
-- Disponível apenas no painel administrativo, nunca na tela do operador.
-- Exige motivo por escrito antes de confirmar.
-- Repõe o estoque dos itens automaticamente.
-- Ajusta o total do caixa quando a venda cancelada era em dinheiro.
-- Mantém a venda no histórico com status, motivo e responsável — nada é apagado.
+### 6. Testando Gestão de Produtos no Admin
+1. Alterne para a visão **Painel administrativo** na barra superior.
+2. Clique em **Novo Produto**.
+3. Clique em **Gerar EAN** para criar um código de barras randômico, informe custo e preço para ver o cálculo da margem em tempo real e salve.
+4. Volte para a tela de **Caixa** e pesquise pelo produto recém-criado.
 
-### Estoque e produto
+---
 
-- Cadastro estruturado com custo, preço, margem e estoque mínimo.
-- Baixa automática no estoque ao concluir uma venda, reposição automática ao cancelar.
-- Indicadores visuais para itens em baixo estoque.
+## 💻 Executando o Projeto
 
-### Painel administrativo
+### Pré-requisitos
+- Node.js 18+ instalado.
 
-- Faturamento do dia e ticket médio, calculados apenas sobre vendas válidas (cancelamentos não entram na conta).
-- Estoque com margem por produto.
-- Histórico de vendas recentes, com destaque visual para vendas canceladas.
-- Visão técnica da fila de sincronização e dos perfis de acesso.
+### Passo a Passo
+1. Instale as dependências:
+   ```bash
+   npm install
+   ```
 
-### Autenticação e perfis
+2. (Opcional) Configure as variáveis do Supabase em `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
+   ```
 
-- Login com Supabase Auth.
-- Perfis separados entre `operator` e `admin`, definidos na tabela `profiles`.
-- Operador acessa só o fluxo de checkout e caixa; admin também vê o painel administrativo.
-- Em `localhost`, o app entra em modo de demonstração local (sem depender do Supabase) e mostra um seletor Operador/Admin na barra superior, só para facilitar testes — esse seletor não existe em produção.
+3. Execute em modo de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
 
-## Setup local
+4. Acesse no navegador: `http://localhost:3000`.
 
-1. Instale as dependências com `npm install`.
-2. Copie `.env.example` para `.env.local`.
-3. Preencha as variáveis do Supabase (opcional para rodar em modo demo local).
-4. Rode `npm run dev`.
-
-Em `localhost` sem as variáveis do Supabase preenchidas, o app funciona sozinho em modo demo, com o seletor de papel Operador/Admin na barra superior.
-
-## Variáveis de ambiente
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-
-## Como testar o login
-
-1. Crie o projeto no Supabase e copie a Project URL e a anon public key.
-2. Preencha o arquivo `.env.local` com os valores do projeto.
-3. Rode `supabase/schema.sql` no SQL editor do projeto.
-4. Execute o app e faça o cadastro pelo modal de acesso.
-5. Confirme o registro gerado na tabela `profiles`.
-6. Para testar a experiência administrativa, altere o campo `role` para `admin` diretamente no Supabase.
-
-## Banco no Supabase
-
-O schema está em `supabase/schema.sql`, incluindo as colunas de cancelamento de venda (`status`, `canceled_at`, `canceled_by`, `cancel_reason`). As instruções `alter table ... add column if not exists` são seguras de rodar de novo em um banco que já existia antes dessas colunas.
-
-## Observações de produto
-
-- O app foi estruturado para continuar operando sem internet e sincronizar quando a conexão retornar.
-- O service worker usa network-first para a navegação — garante instalação como PWA sem correr o risco de prender o operador numa versão desatualizada da tela.
-- O foco principal é demonstrar um PDV com boa UX de operador, boa base técnica e controles de integridade equivalentes aos de um produto comercial.
+> **Modo Demo Local**: Em `localhost` sem as credenciais do Supabase configuradas, o app entra automaticamente em modo de demonstração local, persistindo todas as operações em IndexedDB e exibindo um seletor de papel **Operador / Admin** na barra superior para testes completos.

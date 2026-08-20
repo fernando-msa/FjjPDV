@@ -43,7 +43,7 @@ create table if not exists public.sales (
   total numeric(12,2) not null,
   subtotal numeric(12,2) not null,
   discount numeric(12,2) not null default 0,
-  payment_method text not null check (payment_method in ('pix', 'card', 'cash')),
+  payment_method text not null check (payment_method in ('pix', 'card', 'credit', 'debit', 'cash', 'voucher', 'split')),
   paid_amount numeric(12,2) not null default 0,
   change numeric(12,2) not null default 0,
   cashier text not null,
@@ -56,10 +56,39 @@ create table if not exists public.sales (
 );
 
 -- Migracao idempotente para bancos criados antes do cancelamento de venda existir.
+alter table public.sales drop constraint if exists sales_payment_method_check;
+alter table public.sales add constraint sales_payment_method_check check (payment_method in ('pix', 'card', 'credit', 'debit', 'cash', 'voucher', 'split'));
 alter table public.sales add column if not exists status text not null default 'completed' check (status in ('completed', 'canceled'));
 alter table public.sales add column if not exists canceled_at timestamptz;
 alter table public.sales add column if not exists canceled_by text;
 alter table public.sales add column if not exists cancel_reason text;
+alter table public.sales add column if not exists customer_name text;
+alter table public.sales add column if not exists customer_cpf text;
+alter table public.sales add column if not exists customer_phone text;
+
+alter table public.sales add column if not exists payments_data jsonb;
+
+create table if not exists public.customers (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  cpf_cnpj text,
+  phone text,
+  email text,
+  loyalty_points integer default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.parked_sales (
+  id uuid primary key default gen_random_uuid(),
+  code text not null,
+  label text not null,
+  cart_data jsonb not null default '[]'::jsonb,
+  customer_discount numeric(12,2) not null default 0,
+  customer_data jsonb,
+  total numeric(12,2) not null default 0,
+  created_at timestamptz not null default now()
+);
 
 create table if not exists public.sale_items (
   id uuid primary key default gen_random_uuid(),
@@ -68,8 +97,21 @@ create table if not exists public.sale_items (
   product_name text not null,
   quantity integer not null,
   unit_price numeric(12,2) not null,
+  discount numeric(12,2) not null default 0,
   created_at timestamptz not null default now()
 );
+
+alter table public.customers enable row level security;
+alter table public.parked_sales enable row level security;
+
+drop policy if exists "authenticated users can manage customers" on public.customers;
+create policy "authenticated users can manage customers" on public.customers
+  for all to authenticated using (true) with check (true);
+
+drop policy if exists "authenticated users can manage parked sales" on public.parked_sales;
+create policy "authenticated users can manage parked sales" on public.parked_sales
+  for all to authenticated using (true) with check (true);
+
 
 create table if not exists public.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,

@@ -1,4 +1,4 @@
-export type PaymentMethod = "pix" | "card" | "cash";
+export type PaymentMethod = "pix" | "card" | "credit" | "debit" | "cash" | "voucher" | "split";
 export type AppRole = "operator" | "admin";
 
 export type AuthProfile = {
@@ -25,6 +25,7 @@ export type Product = {
   stock: number;
   minStock: number;
   unit: string;
+  active?: boolean;
 };
 
 export type CartItem = {
@@ -33,6 +34,36 @@ export type CartItem = {
   barcode: string;
   quantity: number;
   unitPrice: number;
+  discount?: number; // Desconto em R$ aplicado no item
+};
+
+export type CustomerInfo = {
+  id?: string;
+  name?: string;
+  cpfCnpj?: string;
+  phone?: string;
+  email?: string;
+  loyaltyPoints?: number;
+};
+
+export type PaymentEntry = {
+  id: string;
+  method: PaymentMethod;
+  amount: number;
+  receivedAmount?: number;
+  change?: number;
+  note?: string;
+};
+
+export type ParkedSale = {
+  id: string;
+  code: string;
+  label: string;
+  cart: CartItem[];
+  customerDiscount: number;
+  customer?: CustomerInfo | null;
+  createdAt: string;
+  total: number;
 };
 
 export type CashMovementType = "opening" | "supply" | "withdrawal" | "closing";
@@ -45,14 +76,30 @@ export type CashMovement = {
   createdAt: string;
 };
 
+export type SessionClosingSummary = {
+  expectedCash: number;
+  expectedCard: number;
+  expectedPix: number;
+  expectedTotal: number;
+  reportedCash: number;
+  reportedCard: number;
+  reportedPix: number;
+  reportedTotal: number;
+  difference: number;
+  note?: string;
+};
+
 export type CashSession = {
   id: string;
   openedAt: string;
   closedAt?: string;
   openingBalance: number;
   totalCashSales: number;
+  totalCardSales?: number;
+  totalPixSales?: number;
   movements: CashMovement[];
   status: "open" | "closed";
+  closingSummary?: SessionClosingSummary;
 };
 
 export type SaleItem = {
@@ -60,6 +107,7 @@ export type SaleItem = {
   name: string;
   quantity: number;
   unitPrice: number;
+  discount?: number;
 };
 
 export type SaleStatus = "completed" | "canceled";
@@ -71,9 +119,11 @@ export type Sale = {
   subtotal: number;
   discount: number;
   paymentMethod: PaymentMethod;
+  payments?: PaymentEntry[];
   paidAmount: number;
   change: number;
   items: SaleItem[];
+  customer?: CustomerInfo | null;
   cashier: string;
   cashierSessionId: string;
   createdAt: string;
@@ -83,6 +133,7 @@ export type Sale = {
   canceledAt?: string;
   canceledBy?: string;
   cancelReason?: string;
+  parkedSaleId?: string;
 };
 
 export type DashboardMetrics = {
@@ -94,7 +145,7 @@ export type DashboardMetrics = {
 
 export type PendingSyncJob = {
   id: string;
-  entity: "sale" | "movement";
+  entity: "sale" | "movement" | "product" | "session";
   payload: unknown;
   createdAt: string;
 };
@@ -105,4 +156,6 @@ export type PdvSnapshot = {
   movements: CashMovement[];
   sessions: CashSession[];
   queue: PendingSyncJob[];
-};
+  parkedSales?: ParkedSale[];
+  customers?: CustomerInfo[];
+};

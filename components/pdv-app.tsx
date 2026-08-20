@@ -9,7 +9,7 @@ import { AdminDashboard } from "@/components/admin/admin-dashboard";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useOfflineStore } from "@/lib/hooks/use-offline-store";
 import { useCart } from "@/lib/hooks/use-cart";
-import type { CashMovement, Sale } from "@/lib/types";
+import type { CashMovement, CustomerInfo, ParkedSale, Product, Sale } from "@/lib/types";
 
 export function PdvApp() {
   const auth = useAuth();
@@ -19,7 +19,11 @@ export function PdvApp() {
 
   const cashBalance =
     store.activeSession.openingBalance +
-    store.movements.reduce((acc, movement) => acc + (movement.type === "supply" ? movement.amount : movement.type === "withdrawal" ? -movement.amount : 0), 0);
+    store.movements.reduce(
+      (acc, movement) =>
+        acc + (movement.type === "supply" ? movement.amount : movement.type === "withdrawal" ? -movement.amount : 0),
+      0
+    );
 
   async function finalizeSale(): Promise<Sale | null> {
     if (!cart.canFinalize) {
@@ -31,11 +35,20 @@ export function PdvApp() {
       number: `PDV-${String(store.sales.length + 1).padStart(6, "0")}`,
       total: cart.total,
       subtotal: cart.subtotal,
-      discount: cart.customerDiscount,
+      discount: cart.totalDiscount,
       paymentMethod: cart.paymentMethod,
+      payments: cart.payments.length > 0 ? cart.payments : undefined,
       paidAmount: cart.totalPaid,
       change: cart.change,
-      items: cart.cart.map((item) => ({ productId: item.productId, name: item.name, quantity: item.quantity, unitPrice: item.unitPrice })),
+      items: cart.cart.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discount: item.discount
+      })),
+      customer: cart.customer || undefined,
+      parkedSaleId: cart.activeParkedSaleId || undefined,
       cashier: auth.authState?.fullName ?? "Operador",
       cashierSessionId: store.activeSession.id,
       createdAt: new Date().toISOString(),
@@ -84,11 +97,15 @@ export function PdvApp() {
     await store.cancelSale(saleId, reason, auth.authState?.fullName ?? "Admin");
   }
 
+  async function handleParkSale(label: string) {
+    await store.parkSale(label, cart.cart, cart.customerDiscount, cart.customer);
+  }
+
   if (auth.authLoading) {
     return (
       <main className="pdv-grid flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-sm text-muted-foreground">Carregando autenticacao...</CardContent>
+          <CardContent className="p-6 text-sm text-muted-foreground">Carregando autenticação...</CardContent>
         </Card>
       </main>
     );
@@ -98,8 +115,6 @@ export function PdvApp() {
     return <LoginScreen auth={auth} />;
   }
 
-  // A tela de caixa nunca deve rolar (monitor de operador): o shell ocupa
-  // exatamente 100vh e apenas o painel administrativo, quando aberto, rola.
   const isCheckoutView = !(view === "painel" && auth.isAdmin);
 
   return (
@@ -120,22 +135,32 @@ export function PdvApp() {
         <div className={`min-h-0 flex-1 ${isCheckoutView ? "" : "overflow-y-auto"}`}>
           {view === "painel" && auth.isAdmin ? (
             <AdminDashboard
-            products={store.products}
-            sales={store.sales}
-            activeSession={store.activeSession}
-            cashBalance={cashBalance}
-            status={store.status}
-            onCancelSale={cancelSale}
-          />
+              products={store.products}
+              sales={store.sales}
+              sessions={store.sessions}
+              activeSession={store.activeSession}
+              cashBalance={cashBalance}
+              status={store.status}
+              onCancelSale={cancelSale}
+              onSaveProduct={store.saveProduct}
+              onDeleteProduct={store.deleteProduct}
+            />
           ) : (
             <OperatorScreen
               products={store.products}
               activeSession={store.activeSession}
               movements={store.movements}
               cart={cart}
+              parkedSales={store.parkedSales}
+              customers={store.customers}
               onFinalizeSale={finalizeSale}
               onSupplyMovement={supplyMovement}
               onWithdrawalMovement={withdrawalMovement}
+              onParkSale={handleParkSale}
+              onResumeSale={cart.loadParkedSale}
+              onDeleteParkedSale={store.deleteParkedSale}
+              onSaveCustomer={store.saveCustomer}
+              onCloseSession={store.closeActiveSession}
             />
           )}
         </div>
@@ -143,3 +168,4 @@ export function PdvApp() {
     </main>
   );
 }
+
